@@ -1,0 +1,15 @@
+@Order.Api_HostAddress = http://localhost:5067
+
+POST {{Order.Api_HostAddress}}/orders
+Content-Type: application/json
+{
+  "customerId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "productId": "12345678-1234-1234-1234-123456789012",
+  "quantity": 2,
+  "totalAmount": 250.50
+}
+
+
+
+
+###
