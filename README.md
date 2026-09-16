@@ -6,7 +6,7 @@ The goal of this repository is to explore how distributed systems handle failure
 
 ## Project Goals
 
-This project is designed to demonstrate enterprise-level backend concepts:
+This project demonstrates enterprise-level backend concepts:
 
 - Building a reliable order processing flow
 - Handling distributed transactions without shared databases
@@ -17,7 +17,7 @@ This project is designed to demonstrate enterprise-level backend concepts:
 
 ## Planned Architecture
 
-The system will evolve around an order workflow with independent services.
+The system evolves around an order workflow with independent services.
 
 Main services:
 
@@ -29,12 +29,13 @@ Each service owns its own data and communicates through asynchronous messaging.
 
 ## Technologies
 
-- .NET 8
+- .NET 10
+- ASP.NET Core 10
 - C#
 - Entity Framework Core
 - RabbitMQ
 - MassTransit (planned)
-- SQL Server / PostgreSQL
+- PostgreSQL
 - Docker
 - Clean Architecture principles
 
@@ -78,7 +79,7 @@ Payment Service
       +---- PaymentFailed
 ```
 
-The workflow will handle scenarios such as:
+The workflow handles scenarios such as:
 
 - Service crashes after database commit but before message acknowledgement
 - Duplicate event delivery
@@ -119,20 +120,41 @@ The workflow will handle scenarios such as:
 - Health checks
 - Containerization
 - CI/CD pipeline
+- Automated releases
+
+## Development Environment
+
+This project is built with:
+
+- .NET 10 SDK
+- ASP.NET Core 10 Runtime
+- Docker
+- RabbitMQ
+- PostgreSQL
 
 ## Why This Project Exists
 
 Many backend systems work correctly in simple scenarios, but production systems must handle failures, retries, network problems, and partial execution.
 
-This project focuses on answering practical questions:
+This project focuses on practical questions:
 
 - What happens if a service crashes during processing?
 - How do we avoid losing messages?
 - How do we handle duplicate events?
 - How do multiple services stay consistent without sharing a database?
 
+## Repository Workflow
+
+This repository follows professional development practices:
+
+- Conventional Commits
+- Pull Request workflow
+- GitHub Actions CI
+- Semantic Versioning (planned)
+- Automated Release workflow (planned)
+
 ## Status
 
 🚧 Work in progress
 
-This repository is being built step by step while exploring reliable distributed systems patterns and enterprise backend architecture.
+This repository is being built step by step while exploring reliable distributed systems patterns and enterprise backend architecture using .NET 10.
