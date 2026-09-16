@@ -1,3 +1,4 @@
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using OrderEntity = Order.Api.Domain.Order;
 
@@ -46,6 +47,9 @@ public class OrderDbContext(DbContextOptions<OrderDbContext> options) : DbContex
             order.Property(x => x.CreatedAtUtc)
                 .IsRequired();
         });
+
+        modelBuilder.AddOutboxMessageEntity();
+        modelBuilder.AddOutboxStateEntity();
     }
 }
 

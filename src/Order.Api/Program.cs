@@ -17,6 +17,14 @@ options.UseNpgsql(builder.Configuration.GetConnectionString("OrderDatabase")));
 
 builder.Services.AddMassTransit(x =>
 {
+       x.AddEntityFrameworkOutbox<OrderDbContext>(
+        options =>
+        {
+            options.UsePostgres();
+
+            options.UseBusOutbox();
+    });
+
     x.UsingRabbitMq((_,cfg) =>
     {
         cfg.Host("localhost", "/", h =>
@@ -25,6 +33,7 @@ builder.Services.AddMassTransit(x =>
             h.Password("admin123");
         });
     });
+
 });
 
 
@@ -43,7 +52,6 @@ app.MapPost("/orders", async ([FromBody]CreateOrderRequest request,OrderDbContex
 
     var order= new OrderEntity(request.CustomerId, request.ProductId, request.Quantity, request.TotalAmount);
     dbContext.Orders.Add(order);
-    await dbContext.SaveChangesAsync();
 
 
     await publishEndpoint.Publish(new OrderSubmitted
@@ -55,6 +63,7 @@ app.MapPost("/orders", async ([FromBody]CreateOrderRequest request,OrderDbContex
         TotalAmount = order.TotalAmount,
         SubmittedAtUtc = DateTime.UtcNow
     },context=> context.CorrelationId = order.Id);
+    await dbContext.SaveChangesAsync();
 
     return Results.Accepted(
     $"/orders/{order.Id}",
