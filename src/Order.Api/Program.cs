@@ -2,9 +2,9 @@ using MassTransit;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Order.Api.Contracts;
-using Order.Api.Data;
+using Order.Infrastructure.Data;
 using OrderProcessing.Contracts.Events;
-using OrderEntity = Order.Api.Domain.Order;
+using OrderEntity = Order.Domain.Entities.Order;
 
 var builder = WebApplication.CreateBuilder(args);
 
