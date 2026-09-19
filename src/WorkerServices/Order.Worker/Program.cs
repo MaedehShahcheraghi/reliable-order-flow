@@ -10,8 +10,13 @@ builder.Services.AddDbContext<OrderDbContext>(options =>
 options.UseNpgsql(builder.Configuration.GetConnectionString("OrderDatabase")));
 builder.Services.AddMassTransit(x =>
 {
-
     x.AddConsumer<PaymentCompletedConsumer>();
+    x.AddEntityFrameworkOutbox<OrderDbContext>(options =>
+    {
+        options.UsePostgres();
+        options.UseBusOutbox();
+    });
+
     x.UsingRabbitMq((context, configuration) =>
     {
         configuration.Host("localhost", "/", h =>
@@ -20,7 +25,11 @@ builder.Services.AddMassTransit(x =>
             h.Password("admin123");
         });
 
-        configuration.ReceiveEndpoint("order-payment-completed", e => e.ConfigureConsumer<PaymentCompletedConsumer>(context));
+        configuration.ReceiveEndpoint("order-payment-completed", e =>
+        {
+            e.UseEntityFrameworkOutbox<OrderDbContext>(context);
+            e.ConfigureConsumer<PaymentCompletedConsumer>(context);
+        });
     });
 });
 var host = builder.Build();
