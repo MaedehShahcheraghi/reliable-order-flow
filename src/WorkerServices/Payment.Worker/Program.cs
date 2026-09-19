@@ -19,14 +19,21 @@ builder.Services.AddMassTransit(x =>
     });
     x.UsingRabbitMq((context, configuration) =>
     {
+
         configuration.Host("localhost", "/", h =>
         {
             h.Username("admin");
             h.Password("admin123");
         });
 
-        configuration.ReceiveEndpoint("payment-submitted-queue", e => e.ConfigureConsumer<OrderSubmittedConsumer>(context));
+        configuration.ReceiveEndpoint("payment-submitted-queue", e =>
+        {
+            e.UseEntityFrameworkOutbox<PaymentDbContext>(context);
+            e.UseMessageRetry(r => r.Exponential(3, TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(3)));
+            e.ConfigureConsumer<OrderSubmittedConsumer>(context);
+        });
     });
+
 });
 
 var host = builder.Build();

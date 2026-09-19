@@ -13,6 +13,9 @@ public class OrderSubmittedConsumer(PaymentDbContext paymentDbContext, IPublishE
               var message =
             context.Message;
 
+        //USE THIS IF YOU WANT TO WATCH THE RESULT OF WORKING WITH RETRY MESSAGE PATTERN
+        throw new ArgumentNullException(nameof(message), "Message cannot be null.");
+
         var payment= new PaymentEntity(message.OrderId, message.TotalAmount, PaymentStatus.Completed);
         paymentDbContext.Payments.Add(payment);
 
