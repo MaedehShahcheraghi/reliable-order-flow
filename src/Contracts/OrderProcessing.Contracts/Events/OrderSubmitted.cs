@@ -1,6 +1,6 @@
 namespace OrderProcessing.Contracts.Events;
 
-public class OrderSubmitted
+public sealed record OrderSubmitted
 {
      public Guid OrderId { get; init; }
 

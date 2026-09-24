@@ -12,6 +12,7 @@ builder.Services.AddMassTransit(x =>
 {
     x.AddConsumer<PaymentCompletedConsumer>();
     x.AddConsumer<PaymentFaultConsumer>();
+    x.AddConsumer<PaymentFailedConsumer>();
     x.AddEntityFrameworkOutbox<OrderDbContext>(options =>
     {
         options.UsePostgres();
@@ -26,12 +27,27 @@ builder.Services.AddMassTransit(x =>
             h.Password("admin123");
         });
 
-        configuration.ReceiveEndpoint("order-payment-completed", e =>
-        {
-            e.UseEntityFrameworkOutbox<OrderDbContext>(context);
-            e.UseMessageRetry(r => r.Exponential(3, TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(3)));
-            e.ConfigureConsumer<PaymentCompletedConsumer>(context);
-        });
+      configuration.ReceiveEndpoint(
+    "order-payment-events",
+    e =>
+    {
+        e.UseEntityFrameworkOutbox<OrderDbContext>(
+            context);
+
+        e.UseMessageRetry(
+            r => r.Exponential(
+                3,
+                TimeSpan.FromSeconds(5),
+                TimeSpan.FromSeconds(30),
+                TimeSpan.FromSeconds(3)));
+
+
+        e.ConfigureConsumer<PaymentCompletedConsumer>(
+            context);
+
+        e.ConfigureConsumer<PaymentFailedConsumer>(
+            context);
+    });
 
         configuration.ReceiveEndpoint("payment-fault-queue", e =>
         {
