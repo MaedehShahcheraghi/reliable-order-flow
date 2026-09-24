@@ -6,9 +6,11 @@ public enum OrderStatus
 
     Processing = 2,
 
-    Paid=3,
+    Paid = 3,
 
     Completed = 4,
 
-    Cancelled = 5
+    Cancelled = 5,
+
+    failed=6
 }

@@ -2,6 +2,7 @@ using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Payment.Worker.Consumers;
 using Payment.Worker.Data;
+using Payment.Worker.GatewaySimulation;
 
 var builder = Host.CreateApplicationBuilder(args);
 
@@ -35,6 +36,8 @@ builder.Services.AddMassTransit(x =>
     });
 
 });
+
+builder.Services.AddScoped<IPaymentGateway, PaymentGateway>();
 
 var host = builder.Build();
 host.Run();

@@ -52,4 +52,9 @@ public class Order
     {
         Status = OrderStatus.Paid;
     }
+
+    public void MarkPaymentAsFailed()
+    {
+        Status = OrderStatus.failed;
+    }
 }
