@@ -11,6 +11,8 @@ public sealed class PaymentFailedConsumer(
     public async Task Consume(
         ConsumeContext<PaymentFailed> context)
     {
+
+        //throw new NotImplementedException();
         var message = context.Message;
 
 

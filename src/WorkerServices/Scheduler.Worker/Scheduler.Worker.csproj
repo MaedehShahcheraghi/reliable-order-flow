@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>dotnet-Scheduler.Worker-7282ec82-ffe9-496c-b5c3-53040ad474f0</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MassTransit.Quartz" Version="8.5.10" />
+    <PackageReference Include="MassTransit.RabbitMQ" Version="8.5.10" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.12" />
+    <PackageReference Include="Npgsql" Version="10.0.3" />
+    <PackageReference Include="Quartz.Serialization.SystemTextJson" Version="3.18.1" />
+  </ItemGroup>
+</Project>

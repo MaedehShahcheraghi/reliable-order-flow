@@ -9,9 +9,10 @@ var builder = Host.CreateApplicationBuilder(args);
 
 builder.Services.AddDbContext<PaymentDbContext>(options =>
 options.UseNpgsql(builder.Configuration.GetConnectionString("PaymentDatabase")));
+var schedulerEndpoint = new Uri("queue:quartz");
 builder.Services.AddMassTransit(x =>
 {
-
+    x.AddMessageScheduler(schedulerEndpoint);
     x.AddConsumer<OrderSubmittedConsumer>();
     x.AddEntityFrameworkOutbox<PaymentDbContext>(options =>
     {
@@ -27,11 +28,31 @@ builder.Services.AddMassTransit(x =>
             h.Password("admin123");
         });
 
+       configuration.UseMessageScheduler(
+        schedulerEndpoint);
+
         configuration.ReceiveEndpoint("payment-submitted-queue", e =>
         {
             e.UseEntityFrameworkOutbox<PaymentDbContext>(context);
-            e.UseMessageRetry(r => r.Exponential(3, TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(3)));
-            e.ConfigureConsumer<OrderSubmittedConsumer>(context);
+              e.UseScheduledRedelivery(r =>
+                {
+                    r.Handle<TimeoutException>();
+                    r.Handle<HttpRequestException>();
+
+                    r.Intervals(
+                        TimeSpan.FromSeconds(15),
+                        TimeSpan.FromSeconds(30),
+                        TimeSpan.FromMinutes(1));
+                });
+
+            e.UseMessageRetry(r =>
+            {
+                r.Handle<TimeoutException>();
+                r.Handle<HttpRequestException>();
+
+                r.Immediate(2);
+            });
+             e.ConfigureConsumer<OrderSubmittedConsumer>(context);
         });
     });
 
