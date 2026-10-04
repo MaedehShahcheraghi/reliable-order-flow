@@ -8,7 +8,7 @@ public class PaymentCompletedConsumer(OrderDbContext orderDbContext) : IConsumer
 {
     public Task Consume(ConsumeContext<PaymentCompleted> context)
     {
-                throw new NotImplementedException();
+               // throw new NotImplementedException();
 
               var message =
             context.Message;

@@ -1,7 +1,7 @@
-namespace OrderProcessing.Contracts.Events;
+namespace OrderProcessing.Contracts.Events.Payment;
 
 public sealed record PaymentFailed
-{ 
+{
      public Guid OrderId { get; init; }
 
     public Guid PaymentId { get; init; }

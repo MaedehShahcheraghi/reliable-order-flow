@@ -1,4 +1,4 @@
-namespace OrderProcessing.Contracts.Events;
+namespace OrderProcessing.Contracts.Events.Payment;
 
 public sealed record PaymentCompleted
 {
