@@ -2,7 +2,9 @@ using MassTransit;
 using OrderProcessing.Contracts.Events;
 
 namespace Inventory.Worker.Consumers;
-
+/// <summary>
+/// Test Consumer.
+/// </summary>
 public class OrderSubmittedConsumer : IConsumer<OrderSubmitted>
 {
     public Task Consume(ConsumeContext<OrderSubmitted> context)
