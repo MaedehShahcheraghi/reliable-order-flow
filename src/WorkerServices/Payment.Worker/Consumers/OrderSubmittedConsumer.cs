@@ -1,5 +1,6 @@
 using MassTransit;
 using OrderProcessing.Contracts.Events;
+using OrderProcessing.Contracts.Events.Payment;
 using Payment.Worker.Data;
 using Payment.Worker.Domain;
 using Payment.Worker.Domain.Enums;

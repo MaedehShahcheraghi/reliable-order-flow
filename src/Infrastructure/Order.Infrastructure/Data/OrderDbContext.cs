@@ -1,5 +1,7 @@
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
+using Order.Infrastructure.Sagas.Configurations;
+using Order.Infrastructure.Sagas;
 using OrderEntity = Order.Domain.Entities.Order;
 
 namespace Order.Infrastructure.Data;
@@ -9,6 +11,9 @@ public class OrderDbContext(DbContextOptions<OrderDbContext> options) : DbContex
 
 
     public DbSet<OrderEntity> Orders { get; set; }
+
+    public DbSet<OrderSagaState> OrderSagaStates =>
+        Set<OrderSagaState>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -48,6 +53,8 @@ public class OrderDbContext(DbContextOptions<OrderDbContext> options) : DbContex
                 .IsRequired();
         });
 
+           new OrderSagaStateMap()
+            .Configure(modelBuilder);
         modelBuilder.AddOutboxMessageEntity();
         modelBuilder.AddOutboxStateEntity();
         modelBuilder.AddInboxStateEntity();

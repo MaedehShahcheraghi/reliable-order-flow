@@ -2,6 +2,7 @@ using Order.Infrastructure.Data;
 using OrderProcessing.Contracts.Events;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
+using OrderProcessing.Contracts.Events.Payment;
 namespace Order.Worker.Consumers;
 
 public sealed class PaymentFailedConsumer(
