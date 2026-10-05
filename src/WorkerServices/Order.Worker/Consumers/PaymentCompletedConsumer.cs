@@ -1,6 +1,7 @@
 using Order.Infrastructure.Data;
 using OrderProcessing.Contracts.Events;
 using MassTransit;
+using OrderProcessing.Contracts.Events.Payment;
 
 namespace Order.Worker.Consumers;
 
