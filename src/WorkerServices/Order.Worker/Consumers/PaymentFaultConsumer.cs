@@ -1,19 +1,26 @@
 using MassTransit;
-using OrderProcessing.Contracts.Events;
+using OrderProcessing.Contracts.Commands;
 
 namespace Order.Worker.Consumers;
 
-public class PaymentFaultConsumer : IConsumer<Fault<OrderSubmitted>>
+
+public sealed class PaymentFaultConsumer
+    : IConsumer<Fault<ProcessPayment>>
 {
-    public Task Consume(ConsumeContext<Fault<OrderSubmitted>> context)
+    public Task Consume(
+        ConsumeContext<Fault<ProcessPayment>> context)
     {
-         var fault =
+        var fault =
             context.Message;
 
         var exception =
-            fault.Exceptions[0];
+            fault.Exceptions.FirstOrDefault();
+
+        Console.WriteLine(
+            $"Payment processing faulted. " +
+            $"OrderId={fault.Message.OrderId} | " +
+            $"Exception={exception?.Message}");
 
         return Task.CompletedTask;
     }
-
 }

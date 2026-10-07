@@ -20,8 +20,8 @@ public class PaymentDbContext(DbContextOptions<PaymentDbContext> options) : DbCo
 
         payment.HasKey(x => x.Id);
 
-        payment.Property(x => x.OrderId)
-            .IsRequired();
+        payment.HasIndex(x => x.OrderId)
+            .IsUnique();
 
         payment.Property(x => x.Amount)
             .HasPrecision(18, 2);
