@@ -1,6 +1,5 @@
 using MassTransit;
 using Quartz;
-using Scheduler.Worker;
 
 var builder = Host.CreateApplicationBuilder(args);
 

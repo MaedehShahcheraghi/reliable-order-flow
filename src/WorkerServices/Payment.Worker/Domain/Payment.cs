@@ -20,8 +20,10 @@ public class Payment
 
     public Payment(Guid orderId,decimal amount,PaymentStatus paymentStatus)
     {
+        Id=Guid.NewGuid();
         OrderId = orderId;
         Amount = amount;
-        Status=paymentStatus;
+        Status = paymentStatus;
+        CreatedAtUtc = DateTime.UtcNow;
     }
 }

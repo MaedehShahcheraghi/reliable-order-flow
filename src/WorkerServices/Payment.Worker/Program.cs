@@ -13,12 +13,8 @@ var schedulerEndpoint = new Uri("queue:quartz");
 builder.Services.AddMassTransit(x =>
 {
     x.AddMessageScheduler(schedulerEndpoint);
-    x.AddConsumer<OrderSubmittedConsumer>();
-    x.AddEntityFrameworkOutbox<PaymentDbContext>(options =>
-    {
-        options.UsePostgres();
-        options.UseBusOutbox();
-    });
+    x.AddConsumer<ProcessPaymentConsumer>();
+    x.AddEntityFrameworkOutbox<PaymentDbContext>(options => options.UsePostgres());
     x.UsingRabbitMq((context, configuration) =>
     {
 
@@ -31,9 +27,8 @@ builder.Services.AddMassTransit(x =>
        configuration.UseMessageScheduler(
         schedulerEndpoint);
 
-        configuration.ReceiveEndpoint("payment-submitted-queue", e =>
+        configuration.ReceiveEndpoint("payment-process-queue", e =>
         {
-            e.UseEntityFrameworkOutbox<PaymentDbContext>(context);
               e.UseScheduledRedelivery(r =>
                 {
                     r.Handle<TimeoutException>();
@@ -52,7 +47,10 @@ builder.Services.AddMassTransit(x =>
 
                 r.Immediate(2);
             });
-             e.ConfigureConsumer<OrderSubmittedConsumer>(context);
+            
+            e.UseEntityFrameworkOutbox<PaymentDbContext>(context);
+
+             e.ConfigureConsumer<ProcessPaymentConsumer>(context);
         });
     });
 
