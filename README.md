@@ -1,160 +1,242 @@
 # Reliable Order Flow
 
-A production-oriented learning project focused on building a reliable order processing workflow using modern backend architecture patterns.
+A .NET 10 distributed order processing system designed around reliable messaging, asynchronous communication, and resilient microservice workflows.
 
-The goal of this repository is to explore how distributed systems handle failures, consistency, messaging, and reliable communication between services.
+This repository focuses on building a production-style backend workflow where services communicate through events and remain reliable in the presence of failures, retries, duplicate messages, and partial execution.
 
-## Project Goals
+## Overview
 
-This project demonstrates enterprise-level backend concepts:
-
-- Building a reliable order processing flow
-- Handling distributed transactions without shared databases
-- Understanding event-driven architecture
-- Implementing message reliability patterns
-- Learning how microservices communicate safely
-- Applying clean architecture and domain-driven design concepts
-
-## Planned Architecture
-
-The system evolves around an order workflow with independent services.
-
-Main services:
+The system models an order workflow with independent services:
 
 - Order Service
 - Payment Service
+- Inventory Service
 - Notification Service (planned)
 
-Each service owns its own data and communicates through asynchronous messaging.
+Each service owns its own data and communicates asynchronously through RabbitMQ using MassTransit.
 
-## Technologies
+The architecture follows eventual consistency principles instead of relying on distributed database transactions.
+
+---
+
+## Architecture
+
+High-level workflow:
+
+```
+Client
+  |
+  v
+Order Service
+  |
+  | Publish OrderSubmitted
+  v
+RabbitMQ
+  |
+  +----------------+
+  |                |
+  v                v
+Payment        Inventory
+Service        Service
+  |
+  |
+  | Publish PaymentCompleted
+  v
+RabbitMQ
+  |
+  v
+Order Service
+```
+
+The workflow handles real-world distributed system scenarios such as:
+
+- Service crashes during message processing
+- Database changes without losing events
+- Duplicate message delivery
+- Temporary failures and retries
+- Eventual consistency between services
+
+---
+
+## Technology Stack
 
 - .NET 10
 - ASP.NET Core 10
 - C#
 - Entity Framework Core
-- RabbitMQ
-- MassTransit (planned)
 - PostgreSQL
+- RabbitMQ
+- MassTransit
 - Docker
-- Clean Architecture principles
+- GitHub Actions
 
-## Reliability Patterns Covered
+---
 
-### Message Delivery
+## Reliability Patterns
 
-- Publisher / Consumer communication
-- Exchange and Queue topology
-- Acknowledgement handling
-- Redelivery scenarios
-- Dead Letter Queue (DLQ)
-- Retry policies
+### Messaging Fundamentals
 
-### Data Consistency
+- RabbitMQ exchanges and queues
+- Publish / Subscribe messaging
+- Routing and topology
+- Message acknowledgement
+- Redelivery handling
+- Dead Letter Queue
 
-- Outbox Pattern
+### Reliable Messaging
+
+- Transactional Outbox Pattern
 - Inbox Pattern
 - Idempotent Consumers
-- Handling duplicate messages
-- Eventually consistent workflows
+- Duplicate message handling
+- Retry strategies
+- Error queues
 
 ### Distributed Workflow
 
-Example flow:
-
-```
-Order Created
-      |
-      v
-Order Service
-      |
-      v
-OrderCreated Event
-      |
-      v
-Payment Service
-      |
-      +---- PaymentSucceeded
-      |
-      +---- PaymentFailed
-```
-
-The workflow handles scenarios such as:
-
-- Service crashes after database commit but before message acknowledgement
-- Duplicate event delivery
-- Consumer retry processing
-- Payment failure compensation
-
-## Learning Roadmap
-
-### Phase 1 - Messaging Fundamentals
-
-- RabbitMQ basics
-- Exchanges and queues
-- Routing keys
-- Consumers
-- Manual acknowledgement
-- Failure scenarios
-
-### Phase 2 - Reliable Messaging
-
-- Retry mechanisms
-- Dead Letter Exchanges
-- Duplicate message handling
-- Idempotency strategies
-
-### Phase 3 - Enterprise Patterns
-
-- MassTransit integration
-- Transactional Outbox
-- Inbox Pattern
 - Saga Pattern
-- Distributed workflow orchestration
+- Compensation actions
+- Long-running business processes
+- Eventually consistent workflows
 
-### Phase 4 - Production Improvements
+---
 
-- Observability
+## Reliability Problems Addressed
+
+### Database and Message Consistency
+
+The system avoids scenarios where:
+
+```
+Save data successfully
+        |
+        v
+Application crashes
+        |
+        v
+Event is never published
+```
+
+Transactional Outbox ensures database changes and outgoing events are handled reliably.
+
+---
+
+### Duplicate Message Processing
+
+Distributed systems usually provide at-least-once delivery, which means a message can be delivered more than once.
+
+The system demonstrates how to handle:
+
+```
+Message received
+      |
+      v
+Consumer crashes
+      |
+      v
+Message delivered again
+```
+
+Inbox and idempotency strategies prevent incorrect repeated processing.
+
+---
+
+## Project Structure
+
+```
+src
+ |
+ +-- Order.Api
+ |
+ +-- Order.Worker
+ |
+ +-- Payment.Worker
+ |
+ +-- Inventory.Worker
+ |
+ +-- Contracts
+```
+
+The structure keeps service boundaries clear while allowing each messaging pattern to be explored independently.
+
+---
+
+## Development Roadmap
+
+### Messaging Layer
+
+- RabbitMQ fundamentals
+- Exchange and queue topology
+- Consumer acknowledgement
+- Retry and redelivery
+- Dead Letter handling
+
+### MassTransit Integration
+
+- Consumers
+- Publish / Send patterns
+- Endpoint configuration
+- Error handling
+- Middleware pipeline
+
+### Reliability Patterns
+
+- Transactional Outbox
+- Consumer Outbox
+- Inbox State
+- Idempotency
+- Duplicate detection
+
+### Distributed Transactions
+
+- Saga orchestration
+- Compensation workflows
+- Failure recovery strategies
+
+### Production Concerns
+
 - Logging
 - Metrics
 - Health checks
 - Containerization
-- CI/CD pipeline
+- CI/CD
 - Automated releases
 
-## Development Environment
+---
 
-This project is built with:
+## Development Workflow
 
-- .NET 10 SDK
-- ASP.NET Core 10 Runtime
-- Docker
-- RabbitMQ
-- PostgreSQL
-
-## Why This Project Exists
-
-Many backend systems work correctly in simple scenarios, but production systems must handle failures, retries, network problems, and partial execution.
-
-This project focuses on practical questions:
-
-- What happens if a service crashes during processing?
-- How do we avoid losing messages?
-- How do we handle duplicate events?
-- How do multiple services stay consistent without sharing a database?
-
-## Repository Workflow
-
-This repository follows professional development practices:
+This repository follows professional engineering practices:
 
 - Conventional Commits
 - Pull Request workflow
 - GitHub Actions CI
-- Semantic Versioning (planned)
-- Automated Release workflow (planned)
+- Semantic Versioning
+- Release automation (planned)
+
+---
+
+## Running Locally
+
+Requirements:
+
+- .NET 10 SDK
+- Docker
+- PostgreSQL
+- RabbitMQ
+
+Infrastructure services are provided through Docker Compose.
+
+---
+
+## Purpose
+
+Modern distributed systems are not only about implementing business logic. They must survive failures, network issues, retries, duplicate messages, and partial execution.
+
+This project explores how reliable backend systems are designed and implemented using .NET technologies and messaging patterns.
+
+---
 
 ## Status
 
-🚧 Work in progress
-
-This repository is being built step by step while exploring reliable distributed systems patterns and enterprise backend architecture using .NET 10.
+🚧 Active development
