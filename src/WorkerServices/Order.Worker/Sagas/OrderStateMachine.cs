@@ -1,8 +1,8 @@
-using Order.Infrastructure.Sagas;
 using MassTransit;
-using OrderProcessing.Contracts.Events.Inventory;
-using OrderProcessing.Contracts.Events;
+using Order.Infrastructure.Sagas;
 using OrderProcessing.Contracts.Commands;
+using OrderProcessing.Contracts.Events;
+using OrderProcessing.Contracts.Events.Inventory;
 namespace Order.Worker.Sagas;
 
 public class OrderStateMachine : MassTransitStateMachine<OrderSagaState>
@@ -18,16 +18,18 @@ public class OrderStateMachine : MassTransitStateMachine<OrderSagaState>
     public Event<OrderSubmitted> Submitted { get; private set; }
         = default!;
 
-        public Event<InventoryReserved>
-    InventoryReservedEvent { get; private set; }
-    = default!;
+    public Event<InventoryReserved>
+InventoryReservedEvent
+    { get; private set; }
+= default!;
 
 
     public Event<InventoryReservationFailed>
-    InventoryReservationFailedEvent { get; private set; }
+    InventoryReservationFailedEvent
+    { get; private set; }
     = default!;
 
-      public OrderStateMachine()
+    public OrderStateMachine()
     {
         InstanceState(x => x.CurrentState);
 
@@ -39,17 +41,18 @@ public class OrderStateMachine : MassTransitStateMachine<OrderSagaState>
         });
 
         Event(() => InventoryReservedEvent, x =>
-{
-    x.CorrelateById(
-        context => context.Message.OrderId);
-});
+        {
+            x.CorrelateById(
+             context => context.Message.OrderId);
+        });
 
 
-Event(() => InventoryReservationFailedEvent, x =>
-{
-    x.CorrelateById(
-        context => context.Message.OrderId);
-});
+        Event(() => InventoryReservationFailedEvent, x =>
+        {
+            x.CorrelateById(
+            context => context.Message.OrderId);
+        });
+
         Initially(
             When(Submitted)
                 .Then(context =>
@@ -58,15 +61,44 @@ Event(() => InventoryReservationFailedEvent, x =>
                     context.Saga.CreatedAtUtc = DateTime.UtcNow;
                 }).Send(new Uri("queue:inventory-reserve"), context => new ReserveInventory
                 {
-                        OrderId =
+                    OrderId =
                             context.Message.OrderId,
 
-                        ProductId =
+                    ProductId =
                             context.Message.ProductId,
 
-                        Quantity =
+                    Quantity =
                             context.Message.Quantity
                 })
                 .TransitionTo(WaitingForInventory));
+        During(
+WaitingForInventory,
+
+When(InventoryReservedEvent)
+.Then(context =>
+{
+    context.Saga.InventoryReservationId =
+        context.Message.ReservationId;
+})
+.Send(
+    new Uri("queue:payment-process-queue"),
+    context => new ProcessPayment
+    {
+        OrderId =
+            context.Saga.CorrelationId,
+
+        Amount =
+            context.Saga.TotalAmount
+    })
+.TransitionTo(
+    WaitingForPayment),
+When(InventoryReservationFailedEvent).Then(context =>
+{
+    context.Saga.FailureReason = context.Message.Reason;
+    context.Saga.FinishedAtUtc = DateTime.UtcNow;
+}).TransitionTo(Cancelled));
+
+
+
     }
 }
